@@ -262,7 +262,7 @@ other value we want to represent. Finally, we will create a `SummarizedExperimen
 object by combining all those pieces.
 
 ```{r,sumExpCreate}
-
+library(SummarizedExperiment)
 # simulate an RNA-seq read counts table
 nrows <- 200
 ncols <- 6
@@ -357,7 +357,7 @@ objects such as IRanges,GRanges and data.frame, or  they can be in flat file for
 such as BigWig,BED and BAM. After the tracks are set, we can display them with
 `plotTracks` function.
 
-```{r,fig.cap="tracks visualized using Gviz"}
+```{r,fig.cap="tracks visualized using Gviz", eval=FALSE}
 library(Gviz)
 # set tracks to display
 

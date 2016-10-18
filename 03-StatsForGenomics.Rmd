@@ -1,9 +1,13 @@
 # Statistics for Genomics
 
 
+DR comments:
 
-
-
+- Consistency throughout between italics and quotes. I like to use italics to introduce new concepts (e.g. population, mean) rather than quotes. But the important thing is being consistent.
+- Figures: it is very clunky to refer to figures as Figure below and above. I think we should enumerate them, and I'm pretty sure we can do that with markdown.
+- "You" vs. "We": I like better to use the we form (as in us and the readers) rather than the you form (just the reader) or the third form ("the reader"). But again, the most important thing is consistency.
+- It is important to clarify when it's real data and when it's made up / simulated. As in the first figure here.
+- Proper R coding stile: again the main point is consistency. I'm fine with = rather than <- but I'd like spaces around '=' to make the code more readable. Always avoid partial matching (e.g., spell out TRUE never use T).
 
 ```{r,setupStatsForGenomics,echo=FALSE}
 library(knitr)
@@ -12,30 +16,26 @@ opts_chunk$set(echo = TRUE, cache=FALSE,warning=FALSE,message=FALSE)
 
 ```
 
-This chapter will summarize statistics and machine-learning methods frequently used
+This chapter will summarize statistical methods frequently used
 in computational genomics. As these fields are continuously evolving,  the
-techniques introduced here do not form an exhaustive list but mostly corner 
-stone methods
-that are often and still being used. In addition, we focused on giving intuitive and 
+techniques introduced here do not form an exhaustive list but cover cornerstone methods
+that are often used in practice. In addition, we focused on giving intuitive and 
 practical understanding of the methods with relevant examples from the field.  
-If you want to dig deeper into statistics and math, beyond what is described
-here, we included appropriate references with annotation after each major 
-section.
+We included appropriate references at the end of each section for those of you interested in the statistical and mathematical details.
 
+## How to summarize a collection of data points: The idea behind statistical distributions
 
-
-## How to summarize collection of data points: The idea behind statistical distributions
-In biology and many other fields data is collected via experimentation. 
-The nature of the experiments and natural variation in biology makes 
-it impossible to get the same exact measurements every time you measure something. 
+In biology and many other fields, data are collected via experimentation. 
+The nature of the experiments and the natural variation in biology make 
+it impossible to get the same exact measurements every time you perform a measurement. 
 For example, if you are measuring gene expression values for 
-a certain gene, say PAX6, and let's assume you are measuring expression
-per sample and cell with any method( microarrays, rt-qPCR, etc.). You will not 
-get the same expression value even if your samples are homogeneous. Due
-to technical bias in experiments or natural variation in the samples. Instead, 
-we would like to describe this collection of data some other way
-that represents the general properties of the data. The figure shows a sample of
-20 expression values from PAX6 gene.
+a certain gene, say PAX6, you will not 
+get the same expression value even if your samples are homogeneous, due
+to technical biases in experiments and natural variation in the samples.
+This is true independently of the measurment method, e.g. microarrays, rt-qPCR, RNA-seq, etc.  
+We are interested in describing this collection of data in a way
+that represents the general properties of the data. The figure shows a (artificial) sample of
+20 expression values of the PAX6 gene.
 
 ```{r,echo=FALSE,warning=FALSE}
 set.seed(1)
@@ -56,27 +56,24 @@ par(old.par)
 ```
 
 ### Describing the central tendency: mean and median 
+
 As seen in the figure above, the points from this sample are distributed around 
-a central value and the histogram below the dot plot shows number of points in
-each bin. Another observation is that there are some bins that have more points than others. If we want to summarize what we observe, we can try
-to represent the collection of data points 
-with an expression value that is typical to get, something that represents the
+a central value and the histogram below the dot plot shows the number of points in
+each bin. Note that some bins that have more points than others. If we want to summarize what we observe, we can try to represent the collection of data points 
+with an expression value that is "typical" of the sample, something that represents the
 general tendency we observe on the dot plot and the histogram. This value is 
-sometimes called central 
-value or central tendency, and there are different ways to calculate such a value. 
+sometimes called _central value_ or _central tendency_, and can be estimated in different ways.
+
 In the figure above, we see that all the values are spread around 6.13 (red line), 
 and that is indeed what we call mean value of this sample of expression values. 
-It can be calculated with the following formula $\overline{X}=\sum_{i=1}^n x_i/n$, 
+It can be calculated with the following formula $\overline{X}=\frac{\sum_{i=1}^n x_i}{n}$, 
 where $x_i$ is the expression value of an experiment and $n$ is the number of 
-expression value obtained from the experiments. In R, `mean()` function will calculate the 
-mean of a provided vector of numbers. This is called a "sample mean". In reality 
-the possible values of PAX6 expression for all cells (provided each cell is of the 
+expression values obtained from the experiments. In R, the `mean()` function will calculate the 
+mean of a provided vector of numbers. This is called a "sample mean". The possible values of PAX6 expression in all the cells (provided each cell is of the 
 identical cell type and is in identical conditions) are much much more than 20.
-If we had the time and the funding to sample all cells and measure PAX6 expression we would
-get a collection values that would be called, in statistics, a "population". In 
-our case the population will look like the left hand side of the figure below. What we have done with
-our 20 data points is that we took a sample of PAX6 expression values from this
-population, and calculated the sample mean.
+If we had the time and the funding to sample all cells and measure PAX6 expression, we would
+get a collection values that would be called, in statistical terms, a "population". In 
+our case the population will look like the left hand side of the figure below. What we have here is taking a "sample" of 20 data points from the population, and calculated the sample mean.
 
 ```{r,echo=FALSE,warning=FALSE}
 
