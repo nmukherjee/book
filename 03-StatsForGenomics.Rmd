@@ -8,6 +8,7 @@ DR comments:
 - "You" vs. "We": I like better to use the we form (as in us and the readers) rather than the you form (just the reader) or the third form ("the reader"). But again, the most important thing is consistency.
 - It is important to clarify when it's real data and when it's made up / simulated. As in the first figure here.
 - Proper R coding stile: again the main point is consistency. I'm fine with = rather than <- but I'd like spaces around '=' to make the code more readable. Always avoid partial matching (e.g., spell out TRUE never use T).
+- Use the article before the R function name, e.g., the `mean()` function and not `mean()` function.
 
 ```{r,setupStatsForGenomics,echo=FALSE}
 library(knitr)
@@ -73,7 +74,7 @@ mean of a provided vector of numbers. This is called a "sample mean". The possib
 identical cell type and is in identical conditions) are much much more than 20.
 If we had the time and the funding to sample all cells and measure PAX6 expression, we would
 get a collection values that would be called, in statistical terms, a "population". In 
-our case the population will look like the left hand side of the figure below. What we have here is taking a "sample" of 20 data points from the population, and calculated the sample mean.
+our case, the population will look like the left hand side of the figure below. The right hand side shows a "sample" of 20 data points from the population.
 
 ```{r,echo=FALSE,warning=FALSE}
 
@@ -97,86 +98,101 @@ hist(a,xlim=c(2,10),col="red",border="white",main="",
 par(old.par)
 ```
 
-The mean of the population is calculated the same way but traditionally
-Greek letter $\mu$ is used to denote the population mean. Normally, we would not
-have access to the population and we will use sample mean and other quantities 
+Normally, we would not have access to the population and we will use sample mean and other quantities 
 derived from the sample to estimate the population properties. This is the basic 
-idea behind statistical inference which we will see this in action in later 
-sections as well. We
-estimate the population parameters from the sample parameters and there is some
-uncertainty associated with those estimates. We will be trying to assess those
-uncertainties and make decisions in the presence of those uncertainties. 
+idea behind statistical inference, which we will see in action in later 
+sections. We estimate the population parameters from the sample parameters and there is some
+uncertainty associated with those estimates. We will learn how to assess those
+uncertainties and make decisions in their presence.
 
 We are not yet done with measuring central tendency.
 There are other ways to describe it, such as the median value. 
-Mean can be affected by outliers easily. 
-If certain values are very high or low from the 
-bulk of the sample this will shift mean towards those outliers. However, median 
-is not affected by outliers. It is simply the value in a distribution where half 
-of the values are above and the other half is below. In R, `median()` function 
-will calculate the mean of a provided vector of numbers. 
+The mean can be affected by values that lie far away from the center of the distribution. In statistics, such values are called _outliers_.
+A "robust" alternative to the mean is the _median_, which is not affected by outliers.
+The median is simply defined as the value in the distribution, such that half 
+of the values is above and the other half is below. In R, the `median()` function 
+will calculate the median of a provided vector of numbers. 
 
 Let's create a set of random numbers and calculate their mean and median using
-R. 
+R. By simulating values uniformly between 0 and 1, we expect that the mean value is around 0.5.
+
 ```{r}
-#create 10 random numbers from uniform distribution 
-x=runif(10)
+#create 100 random numbers from uniform distribution 
+x=runif(100, min=0, max=1)
 # calculate mean
 mean(x)
 # calculate median
 median(x)
 ```
 
+In the case above, there are no outliers, i.e., all the values lie in the expected range of values. In such cases, the mean and median values are very close to each other, and to the expected value.
+
+What happens if we have a sample with an outlier? Below, we simulate another set of values that are uniformly distributed between 0 and 1, but with the addition of an outlying value, very far from the normal range of values. Such an atypical value can arise, for instance, from an error in the instrumentation used to make the measurements or from a human error in the transcription of the results. In any case, we do not want our estimate of the central value to be affected by just one atypical value.
+
+```{r}
+#create 10 random numbers from uniform distribution with outlier
+x=c(runif(99, min=0, max=1), 100)
+# calculate mean
+mean(x)
+# calculate median
+median(x)
+```
+
+The example above shows why the sensitivity of the mean to outliers can be dangerous. We know that all the values from the distribution should lie between 0 and 1, but a single value of 100 pushes our mean _outside of this range_. The median is unaffected by the outlier.
 
 ### Describing the spread: measurements of variation
+
 Another useful way to summarize a collection of data points is to measure
-how variable the values are. You can simply describe the range of the values
-, such as minimum and maximum values. You can easily do that in R with `range()` 
+how variable the values are. We can simply describe the range of the values
+, such as minimum and maximum values. We can easily do that in R with the `range()` 
 function. A more common way to calculate variation is by calculating something 
 called "standard deviation" or the related quantity called "variance". This is a 
 quantity that shows how variable the values are, a value around zero indicates 
 there is not much variation in the values of the data points, and a high value 
 indicates high variation in the values. The variance is the squared distance of 
 data points from the mean. Population variance is again a quantity we usually
-do not have access to and is simply calculate as follows $\sigma^2=\sum_{i=1}^n \frac{(x_i-\mu)^2}{n}$, where $\mu$ is the population mean, $x_i$ is the ith 
-data point in the population and $n$ is the population size. However, when the
-we have only access to a sample this formulation is biased. It means that it
+do not have access to and is simply calculate as follows $\sigma^2=\sum_{i=1}^n \frac{(x_i-\mu)^2}{n}$, where $\mu$ is the population mean, $x_i$ is the $i$th 
+data point in the population and $n$ is the population size. However, we usually do not have access to the population measurements, and what we compute is the sample variance. It turns out that this formulation of the sample variance is biased, i.e., that it
 underestimates the population variance, so we make a small adjustment when we
 calculate the sample variance, denoted as $s^2$: 
 $$
 \begin{align}
-s^2=\sum_{i=1}^n \frac{(x_i-\overline{X})^2}{n-1} && \text{ where $x_i$ is the ith data point and
-$\overline{X}$ is the sample mean.}
+s^2=\sum_{i=1}^n \frac{(x_i-\overline{x})^2}{n-1} && \text{ where $x_i$ is the ith data point and
+$\overline{x}$ is the sample mean.}
 \end{align}
 $$
 
 
-The sample standard deviation is simply the square-root of the sample variance.
+The sample standard deviation is simply the square root of the sample variance.
 The good thing about standard deviation is that it has the same unit as the mean
 so it is more intuitive.  
-$$s=\sqrt{\sum_{i=1}^n \frac{(x_i-\overline{X})^2}{n-1}}$$
+$$s=\sqrt{\sum_{i=1}^n \frac{(x_i-\overline{x})^2}{n-1}}$$
 
-We can calculate sample standard deviation and variation with `sd()` and `var()`
+We can calculate sample standard deviation and variance with the `sd()` and `var()`
 functions in R. These functions take vector of numeric values as input and 
-calculate the desired quantities. Below we use those functions on a randomly
+calculate the desired quantities. Below we use these functions on a randomly
 generated vector of numbers.
+
 ```{r}
 x=rnorm(20,mean=6,sd=0.7)
 var(x)
 sd(x)
 ```
 
-One potential problem with the variance is that it could be affected by 
+As in the case of the mean, the variance and the standard deviation are affected by 
 outliers. The points that are too far away from the mean will have a large 
-affect on the variance even though there might be few of them.
-A way to measure variance that could be less affected by outliers is 
-looking at where bulk of the distribution is. How do we define where the bulk is? 
-One common way is to look at the the difference between 75th percentile and 25th 
-percentile, this effectively removes a lot of potential outliers which will be
-towards the edges of the range of values. 
-This is called interquartile range , and 
-can be easily calculated using R via `IQR()` function and the quantiles of a vector
-is calculated with `quantile()` function.
+effect on the variance even though there might be few of them.
+Alternative measures of variation that are more robust to outliers are the median absolute deviation (MAD) and the inter quartile range (IQR).
+
+MAD is to variance what median is to mean. In other words, instead of measuring the square distance of each observation to the mean value, we can measure the absolute distance of each observation to the median value.
+Using formulas, this means
+$$mad=\text{median}(|x_i - \text{median}(x)|).$$
+MAD can be computed in R with the `mad()` function.
+
+An alternative is to disregard the points that are outside of the bulk of the data points in computing the variation. How do we define the bulk of the distribution? 
+One common way is to look at the the difference between the 75th percentile and the 25th 
+percentiles (a.k.a. third and first quartiles or upper and lower quartiles). This effectively removes a lot of potential outliers that lie towards the edges of the range of values. 
+This difference is the IQR and can be easily calculated using R via the `IQR()` function. Note that the quantiles of a vector can be calculated with the `quantile()` function.
 
 Let us plot the boxplot for a random vector and also calculate IQR using R. 
 In the boxplot below, 25th and 75th percentiles are the edges of the box, and 
@@ -188,7 +204,7 @@ quantile(x)
 ```
 
 ```{r,eval=FALSE}
-boxplot(x,horizontal = T)
+boxplot(x,horizontal = TRUE)
 ```
 
 ```{r,echo=FALSE,warnings=FALSE,message=FALSE}
@@ -199,22 +215,53 @@ text(a[1],1.25,"25th percentile")
 text(a[3],1.25,"75th percentile")
 ```
 
+We can verify that MAD and IQR are more robust to outliers than variance and standard deviation in the following example.
+
+```{r}
+x=rnorm(20,mean=6,sd=0.7)
+var(x)
+sd(x)
+
+mad(x)
+IQR(x)
+
+
+x=c(x, 100)
+var(x)
+sd(x)
+
+mad(x)
+IQR(x)
+```
+
+MAD and IQR are essentially unaffected by the inclusion of the outlying value, while the variance and standard deviation change dramatically.
+
 #### Frequently used statistical distributions
-The distributions have parameters (such as mean and variance) that 
-summarizes them but also they are functions that assigns each outcome of a 
+
+To describe the distribution of the data points, it is essential to have an idea of their _location_ and _scale_. This can be achieved by computing the mean and the variance (or their robust counterparts).
+However, only knowing location and scale is not enough to completely define the _distribution_ of the data.
+For instance, the following distributions have the same mean and variance, but have clearly different _shapes_.
+
+```{r, echo=FALSE}
+x1 = rnorm(1000, mean=1, sd=1)
+x2 = rgamma(1000, scale=1, shape=1)
+plot(density(x1), lwd=2, col="red", ylim=c(0, .75), xlim=c(-3, 16), main="", xlab="x", ylab="P(x)")
+lines(density(x2), lwd=2, col="blue")
+```
+
+The "shape" of the data is what in statistics is referred to as the _probability distribution_. A distribution is a function that assigns each outcome of a 
 statistical experiment to its probability of occurrence.
+
 One distribution that you 
-will frequently encounter is the normal distribution or Gaussian distribution.
+will frequently encounter is the normal distribution, a.k.a. the Gaussian distribution.
 The normal distribution has a typical "bell-curve" shape
-and, characterized by mean and standard deviation. A set of data points 
+and can be characterized by the mean and standard deviation. A set of data points 
 that
-follow normal distribution mostly will be close to the mean 
-but spread around it controlled by the standard deviation parameter. That 
+follow the normal distribution will mostly be spread around the mean, with the spread controlled by the standard deviation parameter. That 
 means if we sample data points from a normal distribution we are more
 likely to sample nearby the mean and sometimes away from the mean. 
 Probability of an event occurring is higher if it is nearby the mean.
-The effect
-of the parameters for normal distribution can be observed in the following 
+The effect of the parameters for the normal distribution can be observed in the following 
 plot.
 
 ```{r,echo=FALSE}
@@ -232,7 +279,7 @@ legend("topright",c(expression(paste(mu,"=0, ",sigma,"=0.5")),
 
 ```
 
-The normal distribution is often denoted by $\mathcal{N}(\mu,\,\sigma^2)$ When a random variable $X$ is distributed normally with mean $\mu$ and variance $\sigma^2$, we write:
+The normal distribution is often denoted by $\mathcal{N}(\mu,\,\sigma^2)$. When a random variable $X$ is distributed as a Gaussian with mean $\mu$ and variance $\sigma^2$, we write:
 
 $$X\ \sim\ \mathcal{N}(\mu,\,\sigma^2).$$
 
@@ -245,6 +292,8 @@ $$P(x)=\frac{1}{\sigma\sqrt{2\pi} } \; e^{ -\frac{(x-\mu)^2}{2\sigma^2} } $$
 The probability density function gives the probability of observing a value
 on a normal distribution defined by $\mu$ and
 $\sigma$ parameters.
+
+DR: say that this is a continuous distribution so we cannot compute the exact probability of an event, hence intervals.
 
 Often times, we do not need the exact probability of a value but we need the
 probability of observing a value larger or smaller than a critical value or reference 
