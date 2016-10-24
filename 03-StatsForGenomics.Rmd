@@ -284,7 +284,7 @@ The normal distribution is often denoted by $\mathcal{N}(\mu,\,\sigma^2)$. When 
 $$X\ \sim\ \mathcal{N}(\mu,\,\sigma^2).$$
 
 The probability
-density function of Normal distribution with mean $\mu$ and standard deviation
+density function of the normal distribution with mean $\mu$ and standard deviation
 $\sigma$ is as follows
 
 $$P(x)=\frac{1}{\sigma\sqrt{2\pi} } \; e^{ -\frac{(x-\mu)^2}{2\sigma^2} } $$
@@ -295,33 +295,33 @@ $\sigma$ parameters.
 
 DR: say that this is a continuous distribution so we cannot compute the exact probability of an event, hence intervals.
 
-Often times, we do not need the exact probability of a value but we need the
-probability of observing a value larger or smaller than a critical value or reference 
+The Gaussian distribution is a _continuous distribution_, defined for the whole real line. This means that rather than computing the probability of occurrance of each exact values, we need to compute the probability of observing a _range of values_. Often times, we want to compute the probability of observing a value larger or smaller than a _critical value_ or reference 
 point. For example, we might want to know the probability of $X$ being smaller than or
-equal to -2 for a normal distribution with mean 0 and standard deviation 2.
-,$P(X <= -2 \; | \;  \mu=0,\sigma=2)$. In this case, what we want is the are under the
-curve shaded in blue. To be able to that we need to integrate the probability
-density function but we will usually let software do that. Traditional,
-you calculate a Z-score which is simply $(X-\mu)/\sigma=(-2-0)/2=1$, and
-corresponds to how many standard deviations you are away from the mean. 
-This is also called "standardization", the corresponding value is distributed in "standard normal distribution" where $\mathcal{N}(0,\,1)$.
+equal to -2 for a normal distribution with mean 0 and standard deviation 1, a.k.a. the _standard normal distribution_, 
+$P(X <= -2 \; | \;  \mu=0,\sigma=1)$. This is equivalent to the area under the
+curve shaded in blue, and can be computed by integrating the probability
+density function. 
 
-After calculating the Z-score,
-we can go look up in a table, that contains the area under the curve for 
-the left and right side of the Z-score, but again use software for that
-tables are old school.
-
-Below we are showing the Z-score and the associated probabilities derived
-from the calculation above for $P(X <= -2 \; | \;  \mu=0,\sigma=2)$.
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 require(mosaic)
-xpnorm(c(-2), mean=0, sd=2,lower.tail = TRUE,invisible=T,verbose=FALSE)
+xpnorm(c(-2), mean=0, sd=1,lower.tail = TRUE,invisible=T,verbose=FALSE)
 ```
 
-In R, family of `*norm` functions (`rnorm`,`dnorm`,`qnorm` and `pnorm`) can
+Every variable distributed according to a Gaussian distribution, can be _standardized_ to have mean 0 and variance 1. This can simply be done by subtracting the mean $\mu$ and dividing by the standard deviation $\sigma$. The new quantity, often referred to as the _z-score_, is defined as $Z = (X - \mu)/\sigma$, and corresponds to how many standard deviations we are away from the mean. 
+
+After calculating the Z-score, we could go look up in a table, that contains the area under the curve for the left and right side of the Z-score. However, R can do that for us.
+
+Below we are showing the Z-score and the associated probabilities derived
+from the calculation above for $P(X <= -2 \; | \;  \mu=3,\sigma=4)$.
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+xpnorm(c(-2), mean=3, sd=4,lower.tail = TRUE,invisible=T,verbose=FALSE)
+```
+
+In R, the family of `*norm` functions (`rnorm`,`dnorm`,`qnorm` and `pnorm`) can
 be used to 
-operate with normal distribution, such as calculating probabilities and 
-generating random numbers drawn from normal distribution. 
+operate with normal distributions, such as calculating probabilities and 
+generating random numbers drawn from the normal distribution. 
 
 ```{r}
 # get the probability of P(X= -2) where mean=0 and sd=2
@@ -341,48 +341,42 @@ qnorm( 0.15, mean=0 , sd=2)
 
 ```
 
-There are many other distribution functions in R that can be used the same
+There are many other distribution functions in R that can be used in the same
 way. You have to enter the distribution specific parameters along
-with your critical value, quantiles or number of random numbers depending
-on which function you are using in the family.We will list some of those functions below.
+with your critical value, quantiles, or number of random numbers, depending
+on which function you are using in the family. We will list some of these functions below.
 
-- `dbinom` is for binomial distribution. This distribution is usually used
+- `dbinom` is for the binomial distribution. This distribution is usually used
 to model fractional data and binary data. Examples from genomics includes
 methylation data.
 
-- `dpois` is used for Poisson distribution and `dnbinom` is used for
-negative binomial distribution. These distributions are used to model count
-data such as sequencing read counts.
+- `dpois` is used for the Poisson distribution and `dnbinom` is used for the related negative binomial distribution. These distributions are used to model count data such as sequencing read counts.
 
 - `df` (F distribution) and `dchisq` (Chi-Squared distribution) are used
 in relation to distribution of variation. F distribution is used to model
 ratios of variation and Chi-Squared distribution is used to model 
 distribution of variations. You will frequently encounter these in linear models and generalized linear models.
 
-
 ### Precision of estimates: Confidence intervals
-When we take a random sample from a population and compute a statistic, such as
-the mean, we are trying to approximate the mean of the population. How well this 
-sample statistic estimates the population value will always be a
-concern. A confidence interval addresses this concern because it provides a 
-range of values which is plausible to contain the population parameter of interest.
-Normally, we would not have access to a population. If we did, we would not have to estimate the population parameters and its precision.
 
+When we take a random sample from a population and compute a statistic, such as
+the mean, we are trying to estimate the mean of the population. How well this 
+sample statistic estimates the population value will always be a
+concern. A confidence interval addresses this concern by providing a 
+range of values that is likely to contain the population parameter of interest.
+Normally, we would not have access to a population. If we did, we would not have to estimate the population parameters and its precision.
 
 When we do not have access
 to the population, one way to estimate intervals is to repeatedly take samples from the 
-original sample with replacement, that is we take a data point from the sample
-we replace, and we take another data point until we have sample size of the 
-original sample. Then, we calculate the parameter of interest, in this case mean, and 
-repeat this step a large number of times, such as 1000. At this point, we would have a distribution of re-sampled
+original sample with replacement. That is, we take a data point from the original sample, we put it back (_replacement_), and we take another data point, repeating this procedure until we have the desired sample size, usually the same as of the original sample. Then, we calculate the parameter of interest, in this case the mean, and  repeat this step a large number of times, such as 1,000. At this point, we would have a distribution of re-sampled
 means, we can then calculate the 2.5th and 97.5th percentiles and these will
-be our so-called 95% confidence interval. This procedure, resampling with replacement to
-estimate the precision of population parameter estimates, is known as the __bootstrap__.
+be our so-called 95% confidence interval. This procedure, resampling with replacement to estimate the precision of population parameter estimates, is known as the __bootstrap__.
 
 Let's see how we can do this in practice. We simulate a sample
 coming from a normal distribution (but we pretend we don't know the 
 population parameters). We will try to estimate the precision
 of the mean of the sample using bootstrap to build confidence intervals.
+
 ```{r}
 set.seed(21)
 require(mosaic)
@@ -393,33 +387,25 @@ boot.means=do(1000) * mean(resample(sample1))
 
 # get percentiles from the bootstrap means
 q=quantile(boot.means[,1],p=c(0.025,0.975))
-
+m=mean(sample1)
 # plot the histogram
 hist(boot.means[,1],col="cornflowerblue",border="white",
                     xlab="sample means",main="1000 bootstrap means")
+abline(v=m, lwd=2)
 abline(v=c(q[1], q[2] ),col="red")
 text(x=q[1],y=200,round(q[1],3),adj=c(1,0))
 text(x=q[2],y=200,round(q[2],3),adj=c(0,0))
-
+text(x=m,y=200,round(m,3),adj=c(0,0))
 ```
 
-If we had a convenient mathematical method to calculate confidence interval
-we could also do without resampling methods. It turns out that if we take 
-repeated 
-samples from a population of with sample size $n$, the distribution of means
-( $\overline{X}$) of those samples 
-will be approximately normal with mean $\mu$ and standard deviation
-$\sigma/\sqrt{n}$. This is also known as __Central Limit Theorem(CLT)__ and
-is one of the most important theorems in statistics. This also means that
-$\frac{\overline{X}-\mu}{\sigma\sqrt{n}}$ has a standard normal 
-distribution and we can calculate the Z-score and then we can get 
-the percentiles associated with the Z-score. Below, we are showing the 
+If we know, or if we can assume, that the data are normally distributed, we can compute the confidence intervals without resampling. If $X$ is a sample of $n$ observations distributed as a Gaussian with mean $\mu$ and standard deviation $\sigma$, the distribution of the sample mean $\overline{X}$ is distributed as a Gaussian with mean $\mu$ and standard deviation $\sigma/\sqrt{n}$. This also means that $\frac{\overline{X}-\mu}{\sigma\sqrt{n}}$ has a standard normal 
+distribution and we can calculate the Z-score and its associated percentiles. Below, we are showing the 
 Z-score
 calculation for the distribution of $\overline{X}$, and then
 we are deriving the confidence intervals starting with the fact that
 probability of Z being between -1.96 and 1.96 is 0.95. We then use algebra
 to show that the probability that unknown $\mu$ is captured between
-$\overline{X}-1.96\sigma\sqrt{n}$ and $\overline{X}+1.96\sigma\sqrt{n}$ is 0.95, which is commonly known as 95% confidence interval.
+$\overline{X}-1.96\sigma\sqrt{n}$ and $\overline{X}+1.96\sigma\sqrt{n}$ is 0.95, which is commonly known as the 95% confidence interval.
 
 $$
 \begin{equation} 
@@ -432,16 +418,13 @@ confint=[\overline{X}-1.96\sigma\sqrt{n},\overline{X}+1.96\sigma\sqrt{n}]
 \end{equation}
 $$
 
-
 A 95% confidence interval for population mean is the most common
 common interval to use, and would 
-mean that we would expect 95% of the interval estimates to include the 
-population parameter, in this case mean. However, we can pick any value 
+mean that we would expect the mean to be included in the estimated interval 95% of the times. However, we can pick any value 
 such as 99% or 90%. We can generalize the confidence interval for 
 $(1-\alpha)100%$ as follows:
 
 $$\overline{X} \pm Z_{\alpha/2}\sigma\sqrt{n}$$
-
 
 In R, we can do this using `qnorm()` function to get Z-scores associated
 with ${\alpha/2}$ and ${1-\alpha/2}$. As you can see, the confidence intervals we calculated using CLT are very
@@ -454,12 +437,12 @@ mean(sample1)+qnorm(c(alpha/2,1-alpha/2))*sd/sqrt(n)
 
 ```
 
-The good thing about CLT as long as the sample size is large regardless of 
-the population distribution, the distribution of sample means drawn from
-that population will always be normal. Here we are repeatedly 
-drawing samples 1000 times with sample size $n$=10,30, and 100 from a bimodal,
-exponential and a uniform distribution and we are getting sample mean distributions
-following normal distribution.
+One of the most important results in statistics, is the __Central Limit Theorem (CLT)__. The theorem states that, _for any random variable $X$_ with mean $\mu$ and standard deviation $\sigma$, with $n$ that goes to infinity, the sample mean $\overline{X}$ is distributed as a Gaussian with mean $\mu$ and standard deviation $\sigma/\sqrt{n}$. In practice, this means that for large enough $n$, the sample mean is approximally normally distributed, independently of the distribution of $X$.
+
+To illustrate the validity of the CLT, we are repeatedly 
+drawing samples 1,000 times with sample size $n$=10,30, and 100 from a bimodal,
+exponential and a uniform distribution and we are getting sample mean distributions following normal distribution.
+
 ```{r,echo=FALSE,message=FALSE,warning=FALSE}
 set.seed(101)
 require(mosaic)
@@ -526,21 +509,17 @@ hist(unif100,xlim=c(0,1),main="",xlab="",ylab="",breaks=20,col="gray",
 ```
 
 
-However, we should note that how we constructed the confidence interval
-using standard normal distribution, $N(0,1)$, only works when the when we know the 
-population standard deviation. In reality, we usually have only access
-to a sample and have no idea about the population standard deviation. If
-this is the case we should use estimate the standard deviation using
-sample standard deviation and use something called _t distribution_ instead 
-of standard normal distribution in our interval calculation.  Our confidence interval becomes 
-$\overline{X} \pm t_{\alpha/2}s\sqrt{n}$, with t distribution
-parameter $d.f=n-1$, since now  the following quantity is t distributed $\frac{\overline{X}-\mu}{s/\sqrt{n}}$ instead of standard normal distribution.
+However, we should note that this approach is valid only when we know the 
+population standard deviation. In reality, we do not know it and we need to estimate it from the sample. In such cases, $\frac{\overline{X}-\mu}{s/\sqrt{n}}$ is distributed as a $t di Student$ with $n-1$ degrees of freedom, and we need to rely on the  _t distribution_ instead 
+of the standard normal distribution in our interval calculation.  Our confidence interval becomes 
+$\overline{X} \pm t_{\alpha/2}s\sqrt{n}$, where $t_{\alpha/2}$ is the $\alpha/2$ quantile of the $t$ distribution with $n-1$ degrees of freedom.
 
-The t distribution is similar to standard normal distribution has mean 0 but its spread is larger than the normal distribution
-especially when sample size is small,  and has one parameter $v$ for
-the degrees of freedom, which is $n-1$ in this case. Degrees of freedom
-is simply number of data points minus number of parameters estimated. Here
-we are estimating the mean from the data and the distribution is for the means, therefore degrees of freedom is $n-1$.
+The t distribution is similar to the standard normal distribution, in the sense that it is symmetric and centered around zero. However, its spread is larger than the normal distribution
+especially when sample size is small, and is controlled by a parameter $v$ that indicates
+the degrees of freedom, which in this case are $n-1$, or the number of data points minus number of parameters to be estimated.
+
+The t distribution tends to the standard normal distribution when the degrees of freedom go to infinity. In the figure below, we show the relation between the t distribution and the standard normal distribution, for different values of $v$.
+
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 plot(function(x) dnorm(x,0,1), -4,4,
      main = "",col="red",lwd=2,ylab="P(x)")
@@ -556,34 +535,29 @@ legend("topright",c(expression(paste("N(",mu,"=0, ",sigma,"=1)")),
 
 ```
 
-
 ## How to test for differences in samples
-Often times we would want to compare sets of samples. Such comparisons include
-if wild-type samples have different expression compared to mutants or if healthy
-samples are different from disease samples in some measurable feature (blood count,
-gene expression, methylation of certain loci). Since there is variability in our
-measurements, we need to take that into account when comparing the sets of samples.
-We can simply subtract the means of two samples, but given the variability
-of sampling, at the very least we need to decide a cutoff value for differences
-of means, small differences of means can be explained by random chance due to
-sampling. That means we need to compare the difference we get to a value that
-is typical to get if the difference between two group means were only due to 
-sampling. If you followed the logic above, here we actually introduced two core 
-ideas of something called "hypothesis testing", this is simply using 
-statistics to 
-determine the probability that a given hypothesis (if two sample sets
-are from the same population or not) is true. Formally, those two core 
-ideas are as follows:
 
-1. Decide on a hypothesis to test, often called "null hypothesis" ($H_0$). In our 
- case, the hypothesis is there is no difference between sets of samples. An the "Alternative hypothesis" ($H_1$) is there is a difference between the
- samples.
-2. Decide on a statistic to test the truth of the null hypothesis.
-3. Calculate the statistic
-4. Compare it to a reference value to establish significance, the P-value. Based on that either accept or reject the null hypothesis, $H_0$
+Often times we want to compare sets of samples. This is typically refer to in statistics as _hypothesis testing_. Examples of hypothesis testing are ubiquitous in the life sciences: for instance we may want to test whether some quantitative features (such as blood count, gene expression, methylation of certain loci) are different in healthy individuals compared to diseased patients, or whether mutant samples have a different phenotype than wild-type samples.
+
+Since there is both technical variability dependent on our measurment process and biological variability from one individual to another, we generally do not expect two measures to be exactly the same. The question that we need to ask is whether the observed difference is compatible with the "normal range" of variation, or if it _statistically significant_.
+
+Imagine that we want to test for the difference of a certain characteristic in two groups. One reasonable course of action would be the following: (i) collect a sample from each group (population); (ii) compute the sample mean of each group; (iii) compare the two estimated means: if they differ, we conclude that our groups are indeed different.
+
+However, given the sampling variability, we would never expect the two estimates to be exactly the same, and we would need, at the very least, to decide a cutoff value on such differences: differences that are in the typical range of sampling variability can be explained by random chance, while differences that are far beyond the natural sampling variation are an indication that the two groups are different. In other words, we need to compare the difference we get to a value that is typical to get if the difference between two group means were only due to 
+sampling. If you followed the logic above, here we actually introduced two core 
+ideas of hypothesis testing, which uses statistics to 
+determine the probability that a given hypothesis (if two sample sets
+are from the same population or not) is true. Formally testing an hypothesis consists of the following steps.
+
+1. Define the hypothesis to test, often called _null hypothesis_ ($H_0$). In our 
+ case, the hypothesis is there is no difference in blood pressure between healthy and diseased individuals. The _alternative hypothesis_ ($H_1$) is that the two groups are different.
+2. Identify a _statistic_ to test the null hypothesis.
+3. Calculate the value of the statistic in the sample.
+4. Compare the computed value to a reference value to establish significance. Based on that, either accept or reject the null hypothesis, $H_0$.
 
 
 ### randomization based testing for difference of the means 
+
 There is one intuitive way to go about this. If we believe there are no 
 differences between samples that means the sample labels (test-control or 
 healthy-disease) has no meaning. So, if we randomly assign labels to the 
