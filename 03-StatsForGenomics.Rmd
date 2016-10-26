@@ -219,18 +219,29 @@ We can verify that MAD and IQR are more robust to outliers than variance and sta
 
 ```{r}
 x=rnorm(20,mean=6,sd=0.7)
-var(x)
+
+# caclulate standard deviation
 sd(x)
 
+# calculate MAD
 mad(x)
+
+# calculate IQR
 IQR(x)
+```
 
+In the example above there are no outliers. In such cases all the described indexes give similar answers. What happens when we include a single outlyer?
 
+```{r}
 x=c(x, 100)
-var(x)
+
+# calculate standard deviation
 sd(x)
 
+# calculate MAD
 mad(x)
+
+# calculate IQR
 IQR(x)
 ```
 
@@ -370,7 +381,7 @@ When we do not have access
 to the population, one way to estimate intervals is to repeatedly take samples from the 
 original sample with replacement. That is, we take a data point from the original sample, we put it back (_replacement_), and we take another data point, repeating this procedure until we have the desired sample size, usually the same as of the original sample. Then, we calculate the parameter of interest, in this case the mean, and  repeat this step a large number of times, such as 1,000. At this point, we would have a distribution of re-sampled
 means, we can then calculate the 2.5th and 97.5th percentiles and these will
-be our so-called 95% confidence interval. This procedure, resampling with replacement to estimate the precision of population parameter estimates, is known as the __bootstrap__.
+be our so-called 95% confidence interval. This procedure, resampling with replacement to estimate the distribution of an estimator, is known as the __bootstrap__.
 
 Let's see how we can do this in practice. We simulate a sample
 coming from a normal distribution (but we pretend we don't know the 
@@ -418,8 +429,7 @@ confint=[\overline{X}-1.96\sigma\sqrt{n},\overline{X}+1.96\sigma\sqrt{n}]
 \end{equation}
 $$
 
-A 95% confidence interval for population mean is the most common
-common interval to use, and would 
+A 95% confidence interval for population mean is the most common interval to use, and would 
 mean that we would expect the mean to be included in the estimated interval 95% of the times. However, we can pick any value 
 such as 99% or 90%. We can generalize the confidence interval for 
 $(1-\alpha)100%$ as follows:
@@ -427,8 +437,8 @@ $(1-\alpha)100%$ as follows:
 $$\overline{X} \pm Z_{\alpha/2}\sigma\sqrt{n}$$
 
 In R, we can do this using `qnorm()` function to get Z-scores associated
-with ${\alpha/2}$ and ${1-\alpha/2}$. As you can see, the confidence intervals we calculated using CLT are very
-similar to the ones we got from bootstrap for the same sample. For bootstrap we got $[19.21, 21.989]$ and for the CLT based estimate we got $[19.23638, 22.00819]$.
+with ${\alpha/2}$ and ${1-\alpha/2}$.
+
 ```{r}
 alpha=0.05
 sd=5
@@ -436,6 +446,9 @@ n=50
 mean(sample1)+qnorm(c(alpha/2,1-alpha/2))*sd/sqrt(n)
 
 ```
+
+As you can see, the confidence intervals we calculated using the standard normal distribution are very
+similar to the ones we got from bootstrap for the same sample. For bootstrap we got $[19.21, 21.989]$ and for the CLT based estimate we got $[19.23638, 22.00819]$.
 
 One of the most important results in statistics, is the __Central Limit Theorem (CLT)__. The theorem states that, _for any random variable $X$_ with mean $\mu$ and standard deviation $\sigma$, with $n$ that goes to infinity, the sample mean $\overline{X}$ is distributed as a Gaussian with mean $\mu$ and standard deviation $\sigma/\sqrt{n}$. In practice, this means that for large enough $n$, the sample mean is approximally normally distributed, independently of the distribution of $X$.
 
@@ -510,15 +523,15 @@ hist(unif100,xlim=c(0,1),main="",xlab="",ylab="",breaks=20,col="gray",
 
 
 However, we should note that this approach is valid only when we know the 
-population standard deviation. In reality, we do not know it and we need to estimate it from the sample. In such cases, $\frac{\overline{X}-\mu}{s/\sqrt{n}}$ is distributed as a $t di Student$ with $n-1$ degrees of freedom, and we need to rely on the  _t distribution_ instead 
+population standard deviation. In reality, we do not know it and we need to estimate it from the sample. In such cases, $\frac{\overline{X}-\mu}{s/\sqrt{n}}$ is distributed as a _t di Student_ with $n-1$ degrees of freedom, and we need to rely on the  _t distribution_ instead 
 of the standard normal distribution in our interval calculation.  Our confidence interval becomes 
-$\overline{X} \pm t_{\alpha/2}s\sqrt{n}$, where $t_{\alpha/2}$ is the $\alpha/2$ quantile of the $t$ distribution with $n-1$ degrees of freedom.
+$\overline{X} \pm t_{\alpha/2}s\sqrt{n}$, where $t_{\alpha/2}$ is the $\alpha/2$ quantile of the $t$ distribution with $n-1$ degrees of freedom and $s$ is the sample standard deviation.
 
-The t distribution is similar to the standard normal distribution, in the sense that it is symmetric and centered around zero. However, its spread is larger than the normal distribution
-especially when sample size is small, and is controlled by a parameter $v$ that indicates
-the degrees of freedom, which in this case are $n-1$, or the number of data points minus number of parameters to be estimated.
+The _t_ distribution is similar to the standard normal distribution, in the sense that it is symmetric and centered around zero. However, its spread is larger than the normal distribution
+especially when the sample size is small, and is controlled by a parameter $v$ that indicates
+the degrees of freedom, which in this case are $n-1$, or the number of data points minus the number of parameters to be estimated.
 
-The t distribution tends to the standard normal distribution when the degrees of freedom go to infinity. In the figure below, we show the relation between the t distribution and the standard normal distribution, for different values of $v$.
+The _t_ distribution tends to the standard normal distribution when the degrees of freedom go to infinity. In the figure below, we show the relation between the _t_ distribution and the standard normal distribution, for different values of $v$.
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 plot(function(x) dnorm(x,0,1), -4,4,
@@ -544,41 +557,27 @@ Since there is both technical variability dependent on our measurment process an
 Imagine that we want to test for the difference of a certain characteristic in two groups. One reasonable course of action would be the following: (i) collect a sample from each group (population); (ii) compute the sample mean of each group; (iii) compare the two estimated means: if they differ, we conclude that our groups are indeed different.
 
 However, given the sampling variability, we would never expect the two estimates to be exactly the same, and we would need, at the very least, to decide a cutoff value on such differences: differences that are in the typical range of sampling variability can be explained by random chance, while differences that are far beyond the natural sampling variation are an indication that the two groups are different. In other words, we need to compare the difference we get to a value that is typical to get if the difference between two group means were only due to 
-sampling. If you followed the logic above, here we actually introduced two core 
-ideas of hypothesis testing, which uses statistics to 
-determine the probability that a given hypothesis (if two sample sets
-are from the same population or not) is true. Formally testing an hypothesis consists of the following steps.
+sampling. Here, we just introduced the core ideas of hypothesis testing, which uses statistics to determine the probability that a given hypothesis (if two sample sets are from the same population or not) is true. Formally testing an hypothesis consists of the following steps.
 
 1. Define the hypothesis to test, often called _null hypothesis_ ($H_0$). In our 
- case, the hypothesis is there is no difference in blood pressure between healthy and diseased individuals. The _alternative hypothesis_ ($H_1$) is that the two groups are different.
-2. Identify a _statistic_ to test the null hypothesis.
+ case, the hypothesis is that there is no difference in, say, blood count between healthy and diseased individuals. The _alternative hypothesis_ ($H_1$) is that the two groups are different.
+2. Identify a _test statistic_ to test the null hypothesis. This is simply a function of the data.
 3. Calculate the value of the statistic in the sample.
 4. Compare the computed value to a reference value to establish significance. Based on that, either accept or reject the null hypothesis, $H_0$.
 
+### Randomization-based testing for difference of the means 
 
-### randomization based testing for difference of the means 
-
-There is one intuitive way to go about this. If we believe there are no 
-differences between samples that means the sample labels (test-control or 
-healthy-disease) has no meaning. So, if we randomly assign labels to the 
-samples
-that and calculate the difference of the mean, this creates a null 
-distribution for the $H_0$ where we can compare the real difference and 
+There is one intuitive way to go about this. If we believe that there are no 
+differences between samples, then the two samples are effectively drawn from the _same population_. Hence, if we randomly assign labels to the 
+samples and calculate the difference of the mean, we expect to see a difference that is not far from the observed difference between the two actual group. By definition, the difference that we compute in the randomly generated samples is only define by the sample-to-sample difference. By repeating this random sampling many times, we create a _null distribution_ for the test statistics. Now we can compare the real difference and 
 measure how unlikely it is to get such a value under the expectation of the
-null hypothesis. We can calculate all possible permutations to calculate
-the null distribution. However, sometimes that is not very feasible and 
-equivalent approach would be generating the null distribution by taking a 
-smaller number of random samples with shuffled group membership.
+null hypothesis. One way to randomly assign labels is to calculate all the possible permutations of the sample labels. However, the total number of permutations in a sample of $n$ observations is $n!$ and when $n$ is too large this is infeasible to compute. Instead, we can generate the null distribution by taking a smaller number of random samples with shuffled group membership.
 
 Below, we are doing this process in R. We are first simulating two samples 
 from two different distributions.
-These would be equivalent to gene expression measurements obtained under 
+These would be equivalent, say, to gene expression measurements obtained under 
 different conditions. Then, we calculate the differences in the means
-and do the randomization procedure to get a null distribution when we 
-assume there is no difference between samples, $H_0$. We than calculate how
-often we would get the original difference we calculated under the 
-assumption that $H_0$ is true.
-
+and perform a permutation procedure to get a null distribution, when there is no difference between samples. We then calculate what is the likelihood of obtaining the observed difference, under the null hipothesis of no difference, i.e., when $H_0$ is true.
 
 ```{r}
 set.seed(100)
@@ -596,44 +595,53 @@ hist(exp.null[,1],xlab="null distribution | no difference in samples",
 abline(v=quantile(exp.null[,1],0.95),col="red" )
 abline(v=org.diff,col="blue" )
 text(x=quantile(exp.null[,1],0.95),y=200,"0.05",adj=c(1,0),col="red")
-text(x=org.diff,y=200,"org. diff.",adj=c(1,0),col="blue")
-p.val=sum(exp.null[,1]>org.diff)/length(exp.null[,1])
-p.val
-
+text(x=org.diff,y=200,"obs. diff.",adj=c(1,0),col="blue")
 ```
 
-After doing random permutations and getting a null distribution, it is possible to get a confidence interval for the distribution of difference in means.
-This is simply the 2.5th and 97.5th percentiles of the null distribution, and 
-directly related to the P-value calculation above.
+The figure above shows the distribution of the test statistic, in this case the difference of the means of the two groups, under the null hypothesis of no difference between groups. This distribution is estimated via 1,000 permutations of the original observations. Note that the total number of permutations in this case is $60! = 8.32 \times 10^{81}$.
 
+The blue line in the figure represents the observed difference between the two means. As we can see, it is far from the center of the null distribution. But how far? Is it far enough to be _statistically significant_? A typical way of answering such question is by computing the probability of observing a value equal or more extreme than the observed value, when $H_0$ is true. Such quantity is called the _p_-value.
 
-### Using t-test for difference of the means between two samples
-We can also calculate the difference between means using a t-test. Sometimes we will have too few data points in a sample to do meaningful
-randomization test, also randomization takes more time than doing a t-test.
-This is a test that depends on t distribution. The line of thought follows
-from the CLT and we can show differences in means are t distributed.
-There are couple of variants of the t-test for this purpose. If we assume
+When using permutations, we can simply estimate the _p_-value by counting the number of permutations that give a difference bigger than or equal to the observed value. 
+
+```{r}
+p.val=sum(exp.null[,1]>=org.diff)/length(exp.null[,1])
+p.val
+```
+
+In this case, no such permutation exists, hence we estimate our p-value as $p < 10^{-3}$, i.e., the probability of observing a value equal or more extreme than the observed difference is less than one in one thousand.
+
+**Note that the _p_-value does not indicate the probability that the null hypothesis is true!** This is a common misunderstanding of the _p_-value among practicioners.
+
+The final step of hypothesis testing is to make a decision on whether the null hypothesis, $H_0$, can be rejected, or in this example, if the two means are different. Typically, we are content by accepting a $5%$ chance that we are rejecting the null hypothesis even though it is true. Hence, we generally use a cutoff of 0.05 on the _p_-value and we reject the null hypothesis if $p<0.05$. Obviously this is only an arbitrary choice, and other cutoffs, such as 0.01, are common.
+
+After doing random permutations and getting a null distribution, it is also possible to get a confidence interval for the distribution of difference in means. This is simply the 2.5th and 97.5th percentiles of the null distribution, and is directly related to the _p_-value calculation above.
+
+### Using the t-test for the difference of the means between two samples
+
+We can also calculate the difference between means using a _t_-test. Sometimes we will have too few data points in a sample to rely on permutations. In addition, when the data are truly normally distributed, the _t_-test is _more powerful_ than the nonparametric alternatives.
+The rational behind the _t_-test follows from the CLT as one can show that with a large enough $n$, the differences in means are approximately $t$ distributed.
+There are a few variants of the _t_-test for this purpose. If we assume
 the variances are equal we can use the following version
 
 $$t = \frac{\bar {X}_1 - \bar{X}_2}{s_{X_1X_2} \cdot \sqrt{\frac{1}{n_1}+\frac{1}{n_2}}}$$
 where 
 $$s_{X_1X_2} = \sqrt{\frac{(n_1-1)s_{X_1}^2+(n_2-1)s_{X_2}^2}{n_1+n_2-2}}$$
-In the first equation above the quantity is t distributed with $n_1+n_2-2$ degrees of freedom. We can calculate the quantity then use software 
-to look for the percentile of that value in that t distribution, which is our P-value. When we can not assume equal variances we use "Welch's t-test"
-which is the default t-test in R and also works well when variances and
-the sample sizes are the same. For this test we calculate the following 
+In the first equation above the quantity is t distributed with $n_1+n_2-2$ degrees of freedom. We can calculate this quantity and then use a software 
+to look for the appropriate percentile in the _t_ distribution, which will be our _p_-value. When we cannot assume equal variances we can use "Welch's t-test", which is the default _t_-test in R and also works well when the variances are the same. For this test, we calculate the following 
 quantity:
 
 $$t = {\overline{X}_1 - \overline{X}_2 \over s_{\overline{X}_1 - \overline{X}_2}}$$
 where 
 $$s_{\overline{X}_1 - \overline{X}_2} = \sqrt{{s_1^2 \over n_1} + {s_2^2  \over n_2}}
 $$
-and the degrees of freedom equals to:
+and the degrees of freedom are approximately equal to:
 $$\mathrm{d.f.} = \frac{(s_1^2/n_1 + s_2^2/n_2)^2}{(s_1^2/n_1)^2/(n_1-1) + (s_2^2/n_2)^2/(n_2-1)}
 $$
 
-Luckily, R does all those calculations for us. Below we will show the use of `t.test()` function in R. We will use it on the samples we simulated 
+Luckily, R does all those calculations for us. Below we will show the use of the `t.test()` function in R. We will use it on the samples we simulated 
 above.
+
 ```{r,welchTtest}
 # Welch's t-test
 stats::t.test(gene1,gene2)
@@ -642,35 +650,12 @@ stats::t.test(gene1,gene2)
 stats::t.test(gene1,gene2,var.equal=TRUE)
 ```
 
-A final word on t-tests: they generally assume population where samples coming 
-from have normal
-distribution, however it is been shown t-test can tolerate deviations from
-normality. Especially, when two distributions are moderately skewed in the 
-same direction. This is due to central limit theorem which says means of 
-samples will be distributed normally no matter the population distribution 
-if sample sizes are large.
+A final word on the _t_-tests: they generally assume population where samples are coming from a normal distribution. However, it has been shown that the _t_-test can tolerate deviations from normality. Especially, when two distributions are moderately skewed in the same direction. This is due to central limit theorem which states that means of samples will be distributed normally no matter the population distribution if sample sizes are large.
 
-### multiple testing correction
+### Multiple testing correction
 
 We should think of hypothesis testing as a non-error-free method of making
-decisions. There will be times when we declare something significant and accept 
-$H_1$ but we will be wrong. 
-These decisions are also called "false positives" or "false discoveries", this
-is also known as "type I error". Similarly, we can fail to reject a hypothesis 
-when we actually should. These cases are known as "false negatives", also known
-as "type II error". 
-
-The ratio of true negatives to the sum of 
-true negatives and false positives ($\frac{TN}{FP+TN}$) is known as specificity.
-And we usually want to decrease the FP and get higher specificity. 
-The ratio of true positives to the sum of 
-true positives and false negatives ($\frac{TP}{TP+FN}$) is known as sensitivity.
-And, again we usually want to decrease the FN and get higher sensitivity. 
-Sensitivity is also known as "power of a test" in the context of hypothesis 
-testing. More powerful tests will be highly sensitive and will do less type
-II errors. For the t-test the power is positively associated with sample size
-and the effect size. Higher the sample size, smaller the standard error and 
-looking for the larger effect sizes will similarly increase the power.
+decisions. By definition of the 0.05 cutoff on the p-value, we are willing to accept the risk that $5%$ of the times we are rejecting a true null hypothesis. These wrongful rejections are usually referred to as "false positives" or "false discoveries", and this is also known as "type I error". Similarly, we can fail to reject a hypothesis when we actually should. These cases are known as "false negatives", also known as "type II error". 
 
 The general summary of these the different combination of the decisions are
 included in the table below. 
@@ -695,29 +680,26 @@ differentially
 expressed)
 -------------------------------------------------------------
 
+The ratio of true negatives to the sum of 
+true negatives and false positives ($\frac{TN}{FP+TN}$) is known as _specificity_.
+The ratio of true positives to the sum of 
+true positives and false negatives ($\frac{TP}{TP+FN}$) is known as _sensitivity_.
+Ideally, we would want to decrease both false positives and false negatives and get higher specificity and sensitivity. However, most of the times, increasing sensitivity comes at the cost of specificity and vice versa, and we need to find a trade-off between type I and type II error.
 
-We expect to make more type I errors as the number of tests increase, that 
-means we will reject the null hypothesis by mistake. For example, if we 
-perform a test the 5% significance level, there is a 5% chance of 
-incorrectly rejecting the null hypothesis if the null hypothesis is true. 
-However, if we make 1000 tests where all null hypotheses are true for 
-each of them, the average number of incorrect rejections is 50. And if we 
-apply the rules of probability, there are is almost a 100% chance that
-we will have at least one incorrect rejection.
+The sensitivity is also known as the "power of a test" in the context of hypothesis testing. More powerful tests will be highly sensitive and will do less type II errors. For the t-test the power is positively associated with the sample size and the effect size. Higher the sample size, smaller the standard error and looking for the larger effect sizes will similarly increase the power.
+
+
+When testing many hypotheses, we expect to make more type I errors as the number of tests increases. For example, if we 
+use the typical 0.05 cutoff on the p-value to reject $H_0$, there is a 5% chance of incorrectly rejecting the null hypothesis when the null hypothesis is true. If we repeat a test a thousand times, we should expect to wrongly reject $H_0$, on average, fifty times, and if we  apply the rules of probability, there are is almost a 100% chance that we will have at least one incorrect rejection.
+
 There are multiple statistical techniques to prevent this from happening. 
-These techniques generally shrink the P-values obtained from multiple
-tests to higher values, if the individual P-value is low enough it survives
+These techniques generally adjust the p-values obtained from multiple
+tests to higher values, if the individual p-value is low enough it survives
 this process. The most simple method is just to multiply the individual,
-P-value ($p_i$) with the number of tests ($m$): $m \cdot p_i$, this is 
-called "Bonferroni correction". However, this is too harsh if you have thousands
-of tests. Other methods are developed to remedy this. Those methods 
-rely on ranking the P-values and dividing  $m \cdot p_i$ by the 
+p-value ($p_i$) by the number of tests ($m$): $m \cdot p_i$, this is 
+called the "Bonferroni correction". However, this is too harsh if you have thousands of tests. Other methods have been developed to remedy this. Those methods rely on ranking the p-values and dividing  $m \cdot p_i$ by the 
 rank,$i$, :$\frac{m \cdot p_i }{i}$, this is derived from  Benjamini–Hochberg 
-procedure. This procedure is developed to control for "False Discovery Rate (FDR)"
-, which is proportion of false positives among all significant tests. And in
-practical terms, we get the "FDR adjusted P-value" from the procedure described
-above. This gives us an estimate of proportion of false discoveries for a given
-test. To elaborate, p-value of 0.05 implies that 5% of all tests will be false positives. An FDR adjusted p-value of 0.05 implies that 5% of significant tests will be false positives. The FDR adjusted P-values will result in a lower number of false positives.
+procedure. This procedure is developed to control for "False Discovery Rate (FDR)", which is proportion of false positives among all significant tests. And in practical terms, we get the "FDR adjusted P-value" from the procedure described above. This gives us an estimate of proportion of false discoveries for a given test. To elaborate, p-value of 0.05 implies that 5% of all tests will be false positives. An FDR adjusted p-value of 0.05 implies that 5% of significant tests will be false positives. The FDR adjusted P-values will result in a lower number of false positives.
 
 One final method that is also popular is called the "q-value" 
 method and related to the method above. This procedure relies on estimating the proportion of true null 
